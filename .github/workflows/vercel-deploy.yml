@@ -1,0 +1,46 @@
+# Deploys to Vercel — production on push to main, preview on pull requests. No Vercel GitHub App required.
+# Repo secrets set by the DevOps Bot at provision time: VERCEL_TOKEN (required), VERCEL_SCOPE (only for team accounts).
+name: Deploy to Vercel
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_SCOPE: ${{ secrets.VERCEL_SCOPE }}
+      IS_PROD: ${{ github.event_name == 'push' && 'true' || 'false' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Verify VERCEL_TOKEN is set
+        run: |
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "::error::VERCEL_TOKEN repo secret is not set. Run: gh secret set VERCEL_TOKEN --repo <owner>/<repo> --body <token>" 
+            exit 1
+          fi
+      - name: Build args
+        id: args
+        run: |
+          if [ -n "$VERCEL_SCOPE" ]; then
+            echo "scope=--scope=$VERCEL_SCOPE" >> "$GITHUB_OUTPUT"
+          else
+            echo "scope=" >> "$GITHUB_OUTPUT"
+          fi
+          if [ "$IS_PROD" = "true" ]; then
+            echo "env=production" >> "$GITHUB_OUTPUT"
+            echo "prod=--prod" >> "$GITHUB_OUTPUT"
+          else
+            echo "env=preview" >> "$GITHUB_OUTPUT"
+            echo "prod=" >> "$GITHUB_OUTPUT"
+          fi
+      - run: npm i -g vercel@latest
+      - run: vercel link --yes --project=movie-recommender ${{ steps.args.outputs.scope }} --token=$VERCEL_TOKEN
+      - run: vercel pull --yes --environment=${{ steps.args.outputs.env }} ${{ steps.args.outputs.scope }} --token=$VERCEL_TOKEN
+      - run: vercel build ${{ steps.args.outputs.prod }} --token=$VERCEL_TOKEN
+      - run: rm -rf .git
+      - run: vercel deploy --prebuilt ${{ steps.args.outputs.prod }} ${{ steps.args.outputs.scope }} --token=$VERCEL_TOKEN
