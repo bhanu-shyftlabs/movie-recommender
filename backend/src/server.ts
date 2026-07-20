@@ -1,18 +1,19 @@
 import express from 'express';
 import path from 'path';
 import genresRouter from './routes/genres';
+import moviesRouter from './routes/movies';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-// API routes stub
 const apiRouter = express.Router();
 apiRouter.get('/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
 apiRouter.use('/genres', genresRouter);
+apiRouter.use('/movies', moviesRouter);
 app.use('/api', apiRouter);
 
 // Serve frontend static files
