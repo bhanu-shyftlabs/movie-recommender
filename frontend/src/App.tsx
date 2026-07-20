@@ -1,121 +1,77 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
 import './App.css'
 import Footer from './components/Footer'
+import FilterPanel from './components/FilterPanel'
+
+interface Movie {
+  id: number
+  title: string
+  poster_path: string | null
+  vote_average: number
+  overview: string
+}
+
+const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/w300'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [movies, setMovies] = useState<Movie[]>([])
+  const [loading, setLoading] = useState(false)
 
   return (
     <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
+      <section className="px-6 pt-10 pb-4 text-left">
+        <h1 className="!text-3xl !mb-2">Movie Recommender</h1>
+        <p className="text-[var(--text)]">Filter movies by genre, mood, and rating.</p>
       </section>
 
-      <div className="ticks"></div>
+      <div className="flex flex-col md:flex-row gap-6 px-6 pb-10 flex-1">
+        <div className="md:w-72 shrink-0">
+          <FilterPanel onResults={setMovies} onLoading={setLoading} />
+        </div>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
+        <main className="flex-1">
+          {loading && (
+            <p className="text-[var(--text)] text-center mt-8">Loading…</p>
+          )}
+          {!loading && movies.length === 0 && (
+            <p className="text-[var(--text)] text-center mt-8">
+              Select filters to discover movies.
+            </p>
+          )}
+          {!loading && movies.length > 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              {movies.map((movie) => (
+                <article
+                  key={movie.id}
+                  className="rounded-xl border border-[var(--border)] overflow-hidden bg-[var(--code-bg)] flex flex-col"
                 >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+                  {movie.poster_path ? (
+                    <img
+                      src={`${TMDB_IMAGE_BASE}${movie.poster_path}`}
+                      alt={movie.title}
+                      className="w-full object-cover aspect-[2/3]"
+                    />
+                  ) : (
+                    <div className="w-full aspect-[2/3] bg-[var(--border)] flex items-center justify-center text-[var(--text)] text-xs">
+                      No image
+                    </div>
+                  )}
+                  <div className="p-3 flex flex-col gap-1 flex-1">
+                    <h4 className="text-sm font-semibold text-[var(--text-h)] leading-tight">
+                      {movie.title}
+                    </h4>
+                    <span className="text-xs text-[var(--accent)]">
+                      ★ {movie.vote_average.toFixed(1)}
+                    </span>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+        </main>
+      </div>
 
       <div className="ticks"></div>
-      <section id="spacer"></section>
       <Footer />
     </>
   )
