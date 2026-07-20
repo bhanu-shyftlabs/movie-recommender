@@ -1,5 +1,6 @@
 import express from 'express';
 import path from 'path';
+import moviesRouter from './routes/movies';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -11,6 +12,7 @@ const apiRouter = express.Router();
 apiRouter.get('/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
+apiRouter.use('/movies', moviesRouter);
 app.use('/api', apiRouter);
 
 // Serve frontend static files
