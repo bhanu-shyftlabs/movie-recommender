@@ -12,10 +12,15 @@ RUN npm run build
 FROM node:22-alpine
 WORKDIR /app
 COPY backend/package*.json ./
-RUN npm ci --omit=dev || npm install --omit=dev
+# Install all deps (including devDeps) so tsc is available for the build step
+RUN npm ci || npm install
 COPY backend/ .
+# Compile TypeScript → dist/
+RUN npm run build
+# Prune devDependencies from the final layer
+RUN npm prune --omit=dev
 # Backend must serve ./public statically with an SPA fallback; API routes live under /api
 COPY --from=fe /app/frontend/dist ./public
-ENV PORT=3000
-EXPOSE 3000
-CMD ["node", "src/index.js"]
+ENV PORT=8080
+EXPOSE 8080
+CMD ["node", "dist/server.js"]
