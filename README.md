@@ -21,6 +21,23 @@ The Dockerfile assumes these entrypoints — keep them stable or update the Dock
 
 Built frontend assets land in `./public` (`wwwroot/` for .NET) — the backend must serve them statically with an SPA fallback. Backends read the port from `$PORT` where the CMD does not pass it explicitly.
 
+## Local setup
+
+**Prerequisites:** Docker + Docker Compose
+
+```bash
+# 1. Copy env template and fill in your TMDB API key
+cp .env.example .env
+# edit .env — set TMDB_API_KEY=<your_key>
+
+# 2. Build and start
+docker compose up --build
+
+# 3. Open http://localhost:3000
+```
+
+The container serves the React SPA at `/` and the Express API at `/api` — single process, single port.
+
 ## Deployment (Vercel)
 
 `.github/workflows/vercel-deploy.yml` deploys production on push to `main` and a preview on every pull request. Repo secrets `VERCEL_TOKEN` (and `VERCEL_SCOPE` for team accounts) are set by the DevOps Bot at provision time.
