@@ -1,8 +1,12 @@
 import express from 'express';
+import cors from 'cors';
 import path from 'path';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+const allowedOrigins = process.env.NODE_ENV === 'production' ? false : ['http://localhost:5173'];
+app.use(cors({ origin: allowedOrigins }));
 
 app.use(express.json());
 
