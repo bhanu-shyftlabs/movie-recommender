@@ -46,37 +46,41 @@ export default function FilterPanel({ onResults, onLoading }: Props) {
   }, [])
 
   useEffect(() => {
-    if (fetchRef.current) fetchRef.current.abort()
-    const controller = new AbortController()
-    fetchRef.current = controller
+    const timeout = setTimeout(() => {
+      if (fetchRef.current) fetchRef.current.abort()
+      const controller = new AbortController()
+      fetchRef.current = controller
 
-    const params = new URLSearchParams()
+      const params = new URLSearchParams()
 
-    if (selectedGenres.length > 0) {
-      params.set('genre_ids', selectedGenres.join(','))
-    }
-
-    const mood = MOODS.find((m) => m.label === selectedMood)
-    if (mood) {
-      for (const [k, v] of Object.entries(mood.params)) {
-        params.set(k, v)
+      if (selectedGenres.length > 0) {
+        params.set('genre_ids', selectedGenres.join(','))
       }
-    }
 
-    if (minRating > 0) {
-      params.set('vote_average.gte', String(minRating))
-    }
+      const mood = MOODS.find((m) => m.label === selectedMood)
+      if (mood) {
+        for (const [k, v] of Object.entries(mood.params)) {
+          params.set(k, v)
+        }
+      }
 
-    onLoading(true)
-    fetch(`/api/movies?${params.toString()}`, { signal: controller.signal })
-      .then((r) => r.json())
-      .then((movies: Movie[]) => {
-        onResults(movies)
-        onLoading(false)
-      })
-      .catch((err) => {
-        if (err.name !== 'AbortError') onLoading(false)
-      })
+      if (minRating > 0) {
+        params.set('vote_average.gte', String(minRating))
+      }
+
+      onLoading(true)
+      fetch(`/api/movies?${params.toString()}`, { signal: controller.signal })
+        .then((r) => r.json())
+        .then((movies: Movie[]) => {
+          onResults(movies)
+          onLoading(false)
+        })
+        .catch((err) => {
+          if (err.name !== 'AbortError') onLoading(false)
+        })
+    }, 300)
+
+    return () => clearTimeout(timeout)
   }, [selectedGenres, selectedMood, minRating])
 
   function toggleGenre(id: number) {
