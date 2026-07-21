@@ -1,6 +1,6 @@
 # movie-recommender
 
-Full POC — React/Vite frontend + Express proxy backend in one repo, one Docker image
+Full POC — React/Vite frontend + Express proxy backend in one repo, one Docker image.
 
 _Scaffolded by the DevOps Bot from architecture package `arch-20260720124025-b8f26d`. This is a starting structure only — real implementation happens through the normal ticket pipeline._
 
